@@ -1,1 +1,0 @@
-Calculates the score assigned by the perceptron to a data point x.
