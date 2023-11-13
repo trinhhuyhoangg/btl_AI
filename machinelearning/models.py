@@ -184,6 +184,7 @@ class LanguageIDModel(object):
         Returns:
             A node with shape (batch_size x 5) containing predicted scores
                 (also called logits)
+                test git
         """
         "*** YOUR CODE HERE ***"
 
