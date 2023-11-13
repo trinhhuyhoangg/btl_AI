@@ -44,26 +44,46 @@ DIR_TO_DXDY_MAP = {'North':(0, 1), 'South':(0, -1), 'East':(1, 0), 'West':(-1, 0
 
 def sentence1() -> Expr:
     """Returns a Expr instance that encodes that the following expressions are all true.
-    
+
     A or B
     (not A) if and only if ((not B) or C)
     (not A) or (not B) or C
     """
     "*** BEGIN YOUR CODE HERE ***"
-    util.raiseNotDefined()
+    A = Expr("A")
+    B = Expr("B")
+    C = Expr("C")
+
+    a_or_b = disjoin(A, B)
+    expr2 = ~A % disjoin(~B, C)
+    expr3 = disjoin(~A, ~B, C)
+
+    return conjoin(a_or_b, expr2, expr3)
     "*** END YOUR CODE HERE ***"
 
 
 def sentence2() -> Expr:
     """Returns a Expr instance that encodes that the following expressions are all true.
-    
+
     C if and only if (B or D)
     A implies ((not B) and (not D))
     (not (B and (not C))) implies A
     (not D) implies C
     """
     "*** BEGIN YOUR CODE HERE ***"
-    util.raiseNotDefined()
+    A = Expr('A')
+    D = Expr('D')
+    B = Expr('B')
+    C = Expr('C')
+    B_or_D = B | D
+    notB_and_notD = ~B & ~D
+    B_and_notC = B & ~C
+    mylist = []
+    mylist.insert(0, C % B_or_D)
+    mylist.insert(1, A >> notB_and_notD)
+    mylist.insert(2, ~B_and_notC >> A)
+    mylist.insert(3, ~D >> C)
+    return conjoin([mylist[0], mylist[1], mylist[2], mylist[3]])
     "*** END YOUR CODE HERE ***"
 
 
@@ -80,8 +100,18 @@ def sentence3() -> Expr:
     Pacman is born at time 0.
     """
     "*** BEGIN YOUR CODE HERE ***"
-    util.raiseNotDefined()
+    a = logic.PropSymbolExpr("PacmanAlive_1")
+    b = logic.PropSymbolExpr("PacmanAlive_0")
+    c = logic.PropSymbolExpr("PacmanBorn_0")
+    d = logic.PropSymbolExpr("PacmanKilled_0")
+
+    # sentences
+    cond1 = a % ((b & ~d) | (~b & c))
+    cond2 = ~(b & c)
+    cond3 = c
+    return logic.conjoin(cond1, cond2, cond3)
     "*** END YOUR CODE HERE ***"
+
 
 def findModel(sentence: Expr) -> Dict[Expr, bool]:
     """Given a propositional logic sentence (i.e. a Expr instance), returns a satisfying
@@ -90,38 +120,48 @@ def findModel(sentence: Expr) -> Dict[Expr, bool]:
     cnf_sentence = to_cnf(sentence)
     return pycoSAT(cnf_sentence)
 
+
 def findModelUnderstandingCheck() -> Dict[Expr, bool]:
     """Returns the result of findModel(Expr('a')) if lower cased expressions were allowed.
     You should not use findModel or Expr in this method.
     """
-    a = Expr('A')
     "*** BEGIN YOUR CODE HERE ***"
-    print("a.__dict__ is:", a.__dict__) # might be helpful for getting ideas
-    util.raiseNotDefined()
+
+    class dummyClass:
+        def __init__(self, variable_name: str = 'A'):
+            self.variable_name = variable_name
+
+        def __repr__(self):
+            return self.variable_name
+
+    return {dummyClass('a'): True}
     "*** END YOUR CODE HERE ***"
+
 
 def entails(premise: Expr, conclusion: Expr) -> bool:
     """Returns True if the premise entails the conclusion and False otherwise.
     """
     "*** BEGIN YOUR CODE HERE ***"
-    util.raiseNotDefined()
+    return findModel(premise & ~conclusion) == False
     "*** END YOUR CODE HERE ***"
+
 
 def plTrueInverse(assignments: Dict[Expr, bool], inverse_statement: Expr) -> bool:
     """Returns True if the (not inverse_statement) is True given assignments and False otherwise.
     pl_true may be useful here; see logic.py for its description.
     """
     "*** BEGIN YOUR CODE HERE ***"
-    util.raiseNotDefined()
+    return pl_true(~inverse_statement, assignments)
     "*** END YOUR CODE HERE ***"
 
-#______________________________________________________________________________
+
+# ______________________________________________________________________________
 # QUESTION 2
 
 def atLeastOne(literals: List[Expr]) -> Expr:
     """
-    Given a list of Expr literals (i.e. in the form A or ~A), return a single 
-    Expr instance in CNF (conjunctive normal form) that represents the logic 
+    Given a list of Expr literals (i.e. in the form A or ~A), return a single
+    Expr instance in CNF (conjunctive normal form) that represents the logic
     that at least one of the literals  ist is true.
     >>> A = PropSymbolExpr('A');
     >>> B = PropSymbolExpr('B');
@@ -138,30 +178,37 @@ def atLeastOne(literals: List[Expr]) -> Expr:
     True
     """
     "*** BEGIN YOUR CODE HERE ***"
-    util.raiseNotDefined()
+    return disjoin(literals)
     "*** END YOUR CODE HERE ***"
 
 
 def atMostOne(literals: List[Expr]) -> Expr:
     """
-    Given a list of Expr literals, return a single Expr instance in 
-    CNF (conjunctive normal form) that represents the logic that at most one of 
+    Given a list of Expr literals, return a single Expr instance in
+    CNF (conjunctive normal form) that represents the logic that at most one of
     the expressions in the list is true.
     itertools.combinations may be useful here.
     """
     "*** BEGIN YOUR CODE HERE ***"
-    util.raiseNotDefined()
+    combinations = itertools.combinations(literals, 2)
+    clauses_list = []
+    for combo in combinations:
+        clauses_list.append(disjoin(~combo[0], ~combo[1]))
+
+    return conjoin(clauses_list)
     "*** END YOUR CODE HERE ***"
 
 
 def exactlyOne(literals: List[Expr]) -> Expr:
     """
-    Given a list of Expr literals, return a single Expr instance in 
-    CNF (conjunctive normal form)that represents the logic that exactly one of 
+    Given a list of Expr literals, return a single Expr instance in
+    CNF (conjunctive normal form)that represents the logic that exactly one of
     the expressions in the list is true.
     """
     "*** BEGIN YOUR CODE HERE ***"
-    util.raiseNotDefined()
+    at_least_once = atLeastOne(literals)
+    at_most_once = atMostOne(literals)
+    return logic.conjoin(at_least_once, at_most_once)
     "*** END YOUR CODE HERE ***"
 
 #______________________________________________________________________________
